@@ -11,17 +11,17 @@ We want:
  3. Teams play in parallel and we want minimal number of games
 
 For example for 2 teams of 2 players the solution is: 
- Game 1:
- Team 1: A B
- Team 2: C D
+ Game 1:  
+ Team 1: A B  
+ Team 2: C D  
 
-Game 2:
- Team 1: A D
- Team 2: C B
+Game 2:  
+ Team 1: A D  
+ Team 2: C B  
 
-Game 3:
- Team 1: A C
- Team 2: B D
+Game 3:  
+ Team 1: A C  
+ Team 2: B D  
 
 So each player plays 2 games with each other player and 3 rounds are required. 
 
