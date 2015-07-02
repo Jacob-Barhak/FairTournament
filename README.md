@@ -10,16 +10,17 @@ We want:
  2. Each player plays the same number of games with each other player. 
  3. Teams play in parallel and we want minimal number of games
 
-For example for 2 teams of 2 players the solution is: 
- Game 1:  
+For example for 2 teams of 2 players the solution is:
+
+* Game 1:  
  Team 1: A B  
  Team 2: C D  
 
-Game 2:  
+* Game 2:  
  Team 1: A D  
  Team 2: C B  
 
-Game 3:  
+* Game 3:  
  Team 1: A C  
  Team 2: B D  
 
@@ -30,8 +31,8 @@ It seems like an NP hard problem with elements simialr to the traveling salesman
 The solution approach taken uses Evolutionary Computation using [Inpyred] (https://github.com/aarongarrett/inspyred).
 
 The inputs are:
-TeamSize Vector - this list defines team sizes. For example the e=above example would show [2,2]
-MaxRounds - an integer defining the maximum number of rounds in the tournament
+* TeamSize Vector - this list defines team sizes. For example the e=above example would show [2,2]
+* MaxRounds - an integer defining the maximum number of rounds in the tournament
 
 The output is:
 A list of player swaps after each tournament round
@@ -43,7 +44,9 @@ DEVELOPER CONTACT INFO:
 -----------------------
 
 Jacob Barhak Ph.D.
+
 Email: jacob.barhak@gmail.com
+
 http://sites.google.com/site/jacobbarhak/
 
 
