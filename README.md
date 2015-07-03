@@ -31,7 +31,7 @@ It seems like an NP hard problem with elements simialr to the traveling salesman
 The solution approach taken uses Evolutionary Computation using [Inpyred] (https://github.com/aarongarrett/inspyred).
 
 The inputs are:
-* TeamSize Vector - this list defines team sizes. For example the e=above example would show [2,2]
+* TeamSizes vector - this list defines team sizes. For example the e=above example would show [2,2]
 * MaxRounds - an integer defining the maximum number of rounds in the tournament
 
 The output is:
