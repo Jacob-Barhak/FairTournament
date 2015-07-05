@@ -1,5 +1,6 @@
 Fair Tournament 
 ===============
+This project is currently under construction. Feel free to clone and contribute.
 
 This system attempts to create a fair tournament with M teams with N1,N2..Nm players in each team.
 
