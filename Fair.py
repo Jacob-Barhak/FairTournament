@@ -11,15 +11,37 @@
 
 from __future__ import division
 import sys
-from random import Random
+import random
 from time import time
 import inspyred
 
 
+def CalculatePlayerSwaps(NumberOfPlayers):
+    "Calculates a random set of player pair swaps"
+    # Determine the number of swaps pairs - at least one 
+    # and at most all players swap
+    # note that odd numbers one player will always not sawp
+    NumberOfSwapPairs = random.randint(1,NumberOfPlayers/2)
+    # generate candidates
+    Candidates = list(range(NumberOfPlayers))
+    Swaps = random.sample(Candidates, NumberOfSwapPairs*2)
+    # return a list of players swaped - each pair is a swap
+    return Swaps
+
+
 def Generator(Random, args):
     "Generate solutions"
-    GeneratedSolutions = None
-    return GeneratedSolutions
+    TeamSizes = args['TeamSizes']
+    MaxRounds = args['MaxRounds']
+    NumberOfPlayers = sum(TeamSizes)
+    GeneratedSwaps = [] 
+    # Now calculate swaps for each round. Note that we need one kess
+    # round of swaps then number of rounds since initial placing is
+    # always 1:NumberPofPlayers
+    for RoundCount in range(MaxRounds-1):
+        SwapsToNextRound = CalculatePlayerSwaps(NumberOfPlayers)
+        GeneratedSwaps.append(SwapsToNextRound)
+    return GeneratedSwaps
 
 
 @inspyred.ec.evaluators.evaluator
@@ -43,7 +65,7 @@ def Mutator(Random, Candidate, args):
 
 def main(TeamSizes,MaxRounds,RandomSeed):
     if RandomSeed is None:
-        RandomSeedToUse = Random()
+        RandomSeedToUse = random.Random()
         RandomSeedToUse.seed(time()) 
     Players = list(range(sum(TeamSizes)))
     ea = inspyred.ec.EvolutionaryComputation(RandomSeedToUse)
