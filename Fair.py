@@ -23,8 +23,8 @@ def CalculatePlayerSwaps(NumberOfPlayers):
     # note that odd numbers one player will always not sawp
     NumberOfSwapPairs = random.randint(1,NumberOfPlayers/2)
     # generate candidates
-    Candidates = list(range(NumberOfPlayers))
-    Swaps = random.sample(Candidates, NumberOfSwapPairs*2)
+    PlayerPositions = list(range(NumberOfPlayers))
+    Swaps = random.sample(PlayerPositions, NumberOfSwapPairs*2)
     # return a list of players swaped - each pair is a swap
     return Swaps
 
@@ -43,10 +43,33 @@ def Generator(Random, args):
         GeneratedSwaps.append(SwapsToNextRound)
     return GeneratedSwaps
 
+def ApplySwaps(CurrentPlayerVector,RoundSwaps):
+    "Applies swaps to current player vector to deduce next round teams"
+    RoundSwapsCopy = RoundSwaps[:]
+    ReturnPlayerVector = CurrentPlayerVector[:]
+    while RoundSwapsCopy != []:
+        SwapPosition1 = RoundSwapsCopy.pop()
+        SwapPosition2 = RoundSwapsCopy.pop()
+        RememberPlayer1 = ReturnPlayerVector[SwapPosition1]
+        ReturnPlayerVector[SwapPosition1] = ReturnPlayerVector[SwapPosition2]
+        ReturnPlayerVector[SwapPosition2] = RememberPlayer1
+    return ReturnPlayerVector
+    
 
 @inspyred.ec.evaluators.evaluator
 def Evaluator(Candidate, args):
-    "Custom evaluator"
+    "Score candidtes composed of player swaps"
+    # First recreate the team from the swaps
+    TeamSizes = args['TeamSizes']
+    MaxRounds = args['MaxRounds']
+    NumberOfPlayers = sum(TeamSizes)    
+    CurrentPlayerVector = list(range(NumberOfPlayers))
+    TournamentArrangment = []
+    for RoundSwaps in Candidate:
+        CurrentPlayerVector = ApplySwaps(CurrentPlayerVector,RoundSwaps)
+        TournamentArrangment.appned(CurrentPlayerVector)
+    # TBD, define score for tournament
+    
     Error = 0
     return Error
 
