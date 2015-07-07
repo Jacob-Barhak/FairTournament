@@ -54,7 +54,12 @@ def ApplySwaps(CurrentPlayerVector,RoundSwaps):
         ReturnPlayerVector[SwapPosition1] = ReturnPlayerVector[SwapPosition2]
         ReturnPlayerVector[SwapPosition2] = RememberPlayer1
     return ReturnPlayerVector
-    
+
+
+def PlayedWithPlayerCount(Player, TeamSizes, PreviousPlaysForPlayer):
+    "returns a vector of number of playes with player"
+    # TBD - define this function
+    return []
 
 @inspyred.ec.evaluators.evaluator
 def Evaluator(Candidate, args):
@@ -69,6 +74,16 @@ def Evaluator(Candidate, args):
         CurrentPlayerVector = ApplySwaps(CurrentPlayerVector,RoundSwaps)
         TournamentArrangment.appned(CurrentPlayerVector)
     # TBD, define score for tournament
+    # first figure out who played with who how many times for each round
+    # So create and initialize the tensor
+    PlaysTensor = []
+    for Round in range(MaxRounds):
+        if Round == 0:
+            PreviousPlays = [[0] * NumberOfPlayers]* NumberOfPlayers
+        else:
+            PreviousPlays = PlaysTensor[Round-1]
+        PlaysMatrix = [ PlayedWithPlayerCount(Player, TeamSizes, PreviousPlays[Player]) for Player in range(NumberOfPlayers)]
+        PlaysTensor.append(PlaysMatrix)
     
     Error = 0
     return Error
