@@ -11,6 +11,7 @@
 
 from __future__ import division
 import sys
+import copy
 import random
 from time import time
 import inspyred
@@ -125,8 +126,13 @@ def Evaluator(Candidate, args):
 
 @inspyred.ec.variators.crossover
 def Crossover(Random, Mom, Dad, args):
-    "Custom crossover"
-    Brother,Sister = None,None
+    "Crossover round swaps between two tournament solutions"
+    Brother = copy.deepcopy(Dad[:])
+    Sister = copy.deepcopy(Dad[:])
+    for (Round, BrotherRoundSwaps) in enumerate(Brother):
+        if Random.random()<0.5:
+            Brother[Round] = Sister[Round]
+            Sister[Round] = BrotherRoundSwaps
     return Brother,Sister
 
 @inspyred.ec.variators.mutator
