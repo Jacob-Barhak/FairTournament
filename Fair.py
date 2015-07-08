@@ -137,9 +137,15 @@ def Crossover(Random, Mom, Dad, args):
 
 @inspyred.ec.variators.mutator
 def Mutator(Random, Candidate, args):
-    "Custom Mutator"
-    Muteted = None
-    return Muteted
+    "Mutate swaps to add some variation"
+    TeamSizes = args['TeamSizes']
+    NumberOfPlayers = sum(TeamSizes)    
+    MutationRate = args('mutation_rate')
+    Mutated = copy.deepcopy(Candidate)
+    for (Round, RoundSwaps) in enumerate(Mutated):
+        if Random.random() < MutationRate:
+            Mutated[Round] = CalculatePlayerSwaps(NumberOfPlayers)
+    return Mutated
    
 
 def main(TeamSizes,MaxRounds,RandomSeed):
