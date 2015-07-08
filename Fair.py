@@ -97,11 +97,31 @@ def Evaluator(Candidate, args):
             PreviousPlays = PlaysTensor[Round-1]
         PlaysMatrix = [ PlayedWithPlayerCount(Player, TeamSizes, PreviousPlays[Player], TournamentArrangment[Round]) for Player in range(NumberOfPlayers)]
         PlaysTensor.append(PlaysMatrix)
-    # TBD - continue here defining the evaluation function
-
-
-    Error = 0
-    return Error
+    # Analyze the players tensor
+    BestScoreForAllRounds = float('Inf')
+    for Round in range(MaxRounds):
+        # The base score is the round number to make sure that
+        # the first round wiht the low score appears first
+        BaseScore = Round
+        # The second component of the score is checking if
+        # every player is playing with another
+        PlaysMatrix = PlaysTensor[Round]
+        # At the same time collect information for the third criterion
+        MaxPlays = 0
+        MinPlays = MaxRounds+1
+        for PlaysPerPlayer in PlaysMatrix:
+            for OtherPlayerCount in PlaysPerPlayer:
+                # use 100*MaxRounds squared since this is the most important 
+                # condition to fulfill and we want it to to be significantly
+                # Higer that other conditions
+                BaseScore = BaseScore + (OtherPlayerCount == 0)*100*MaxRounds*MaxRounds
+                MaxPlays = max(MaxPlays,OtherPlayerCount)
+                MinPlays = min(MinPlays,OtherPlayerCount)
+        # The third component is the difference between plays
+        # and  multiply it by MaxRounds to be higher than others
+        BaseScore = BaseScore + (MaxPlays-MinPlays)*MaxRounds*10
+    BestScoreForAllRounds = min(BestScoreForAllRounds,BaseScore)
+    return BestScoreForAllRounds
 
 @inspyred.ec.variators.crossover
 def Crossover(Random, Mom, Dad, args):
