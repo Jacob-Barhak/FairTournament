@@ -56,10 +56,23 @@ def ApplySwaps(CurrentPlayerVector,RoundSwaps):
     return ReturnPlayerVector
 
 
-def PlayedWithPlayerCount(Player, TeamSizes, PreviousPlaysForPlayer):
-    "returns a vector of number of playes with player"
-    # TBD - define this function
-    return []
+
+
+def PlayedWithPlayerCount(Player, TeamSizes, PreviousPlaysForPlayer, PlayerArrangementForRound):
+    "Returns a vector of number of plays with player"
+    # first locate the players team
+    TeamStart = 0
+    Team = None
+    ReturnPlaysPerPlayer = PreviousPlaysForPlayer[:]
+    for TeamSize in TeamSizes:
+        Team = PlayerArrangementForRound[TeamStart:(TeamStart + TeamSize)]
+        if Player in Team:
+            for TeamPlayer in Team:
+                ReturnPlaysPerPlayer[TeamPlayer] = ReturnPlaysPerPlayer[TeamPlayer] + 1
+            break
+    assert Team != None
+    return ReturnPlaysPerPlayer
+
 
 @inspyred.ec.evaluators.evaluator
 def Evaluator(Candidate, args):
@@ -82,9 +95,11 @@ def Evaluator(Candidate, args):
             PreviousPlays = [[0] * NumberOfPlayers]* NumberOfPlayers
         else:
             PreviousPlays = PlaysTensor[Round-1]
-        PlaysMatrix = [ PlayedWithPlayerCount(Player, TeamSizes, PreviousPlays[Player]) for Player in range(NumberOfPlayers)]
+        PlaysMatrix = [ PlayedWithPlayerCount(Player, TeamSizes, PreviousPlays[Player], TournamentArrangment[Round]) for Player in range(NumberOfPlayers)]
         PlaysTensor.append(PlaysMatrix)
-    
+    # TBD - continue here defining the evaluation function
+
+
     Error = 0
     return Error
 
