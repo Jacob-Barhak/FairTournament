@@ -39,7 +39,7 @@ def Generator(random, args):
     # Now calculate swaps for each round. Note that we need one kess
     # round of swaps then number of rounds since initial placing is
     # always 1:NumberPofPlayers
-    for RoundCount in range(MaxRounds-1):
+    for SwapNumber in range(MaxRounds-1):
         SwapsToNextRound = CalculatePlayerSwaps(random, NumberOfPlayers)
         GeneratedSwaps.append(SwapsToNextRound)
     return GeneratedSwaps
@@ -71,6 +71,7 @@ def PlayedWithPlayerCount(Player, TeamSizes, PreviousPlaysForPlayer, PlayerArran
             for TeamPlayer in Team:
                 ReturnPlaysPerPlayer[TeamPlayer] = ReturnPlaysPerPlayer[TeamPlayer] + 1
             break
+        TeamStart = TeamStart + TeamSize
     assert Team != None
     return ReturnPlaysPerPlayer
 
@@ -88,29 +89,30 @@ def FullEvaluation(Candidate, TeamSizes, MaxRounds):
     # first figure out who played with who how many times for each round
     # So create and initialize the tensor
     PlaysTensor = []
-    for Round in range(MaxRounds):
-        if Round == 0:
+    for SwapNumber in range(MaxRounds):
+        if SwapNumber == 0:
             PreviousPlays = [[0] * NumberOfPlayers]* NumberOfPlayers
         else:
-            PreviousPlays = PlaysTensor[Round-1]
-        PlaysMatrix = [ PlayedWithPlayerCount(Player, TeamSizes, PreviousPlays[Player], TournamentArrangment[Round]) for Player in range(NumberOfPlayers)]
+            PreviousPlays = PlaysTensor[SwapNumber-1]
+        PlaysMatrix = [ PlayedWithPlayerCount(Player, TeamSizes, PreviousPlays[Player], TournamentArrangment[SwapNumber]) for Player in range(NumberOfPlayers)]
         PlaysTensor.append(PlaysMatrix)
     # Analyze the players tensor
     BestScoreForAllRounds = float('Inf')
     BestScoreRound = MaxRounds + 1
     ScoreBreakDownPerRound = []
-    for Round in range(MaxRounds):
+    for SwapNumber in range(MaxRounds):
         # The base score is the round number to make sure that
         # the first round wiht the low score appears first
-        BaseScore = Round
+        BaseScore = SwapNumber
         # The second component of the score is checking if
         # every player is playing with another
-        PlaysMatrix = PlaysTensor[Round]
+        PlaysMatrix = PlaysTensor[SwapNumber]
         # At the same time collect information for the third criterion
         MaxPlays = 0
         MinPlays = MaxRounds+1
-        for PlaysPerPlayer in PlaysMatrix:
-            for OtherPlayerCount in PlaysPerPlayer:
+        for (Player,PlaysPerPlayer) in enumerate(PlaysMatrix):
+            PlaysOfOtherPlayers = PlaysPerPlayer[:Player] + PlaysPerPlayer[Player+1:]
+            for OtherPlayerCount in PlaysOfOtherPlayers:
                 # use 100*MaxRounds squared since this is the most important 
                 # condition to fulfill and we want it to to be significantly
                 # Higer that other conditions
@@ -121,12 +123,14 @@ def FullEvaluation(Candidate, TeamSizes, MaxRounds):
         # and  multiply it by MaxRounds to be higher than others
         BaseScore = BaseScore + (MaxPlays-MinPlays)*MaxRounds*10
         # Also register te score breakdown per round
-        ScoreBreakDownPerRound.append([BaseScore,Round,PlaysMatrix,MaxPlays,MinPlays])
-    BestScoreForAllRounds = min(BestScoreForAllRounds, BaseScore)
-    if BaseScore < BestScoreForAllRounds:
-        BestScoreForAllRounds = BaseScore
-        BestScoreRound = Round
-    return  (BestScoreForAllRounds, BestScoreRound, PlaysTensor, ScoreBreakDownPerRound)
+        ScoreBreakDownPerRound.append([BaseScore,SwapNumber,PlaysMatrix,MaxPlays,MinPlays])
+        if BaseScore < BestScoreForAllRounds:
+            BestScoreForAllRounds = BaseScore
+            # in human terms Round 1 is predetermined
+            # therefore for SwapNumber zero we are calculating 
+            # Round 2 - in other words, there is always a swap
+            BestScoreRound = SwapNumber + 1
+    return  (BestScoreForAllRounds, BestScoreRound, TournamentArrangment, PlaysTensor, ScoreBreakDownPerRound)
     
 
 @inspyred.ec.evaluators.evaluator
@@ -136,7 +140,7 @@ def Evaluator(Candidate, args):
     TeamSizes = args['TeamSizes']
     MaxRounds = args['MaxRounds']
     # use full evaluation function
-    (BestScoreForAllRounds, BestScoreRound, PlaysTensor, ScoreBreakDownPerRound) = FullEvaluation(Candidate, TeamSizes, MaxRounds)
+    (BestScoreForAllRounds, BestScoreRound, TournamentArrangment, PlaysTensor, ScoreBreakDownPerRound) = FullEvaluation(Candidate, TeamSizes, MaxRounds)
     return BestScoreForAllRounds
 
 @inspyred.ec.variators.crossover
@@ -182,13 +186,13 @@ def ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed):
                           tournament_size=7,
                           num_selected=2, 
                           num_elites=1,
-                          max_generations=1000,
+                          max_generations=10000,
                           mutation_rate=0.1,
                           TeamSizes=TeamSizes,
                           MaxRounds=MaxRounds)
     BestCandidate = max(FinalPopulation) 
-    (BestScoreForAllRounds, BestScoreRound, PlaysTensor, ScoreBreakDownPerRound) = FullEvaluation(BestCandidate.candidate, TeamSizes, MaxRounds)
-    return ea,FinalPopulation, BestScoreForAllRounds, BestScoreRound, PlaysTensor, ScoreBreakDownPerRound
+    (BestScoreForAllRounds, BestScoreRound, TournamentArrangment, PlaysTensor, ScoreBreakDownPerRound) = FullEvaluation(BestCandidate.candidate, TeamSizes, MaxRounds)
+    return ea,FinalPopulation, BestScoreForAllRounds, BestScoreRound, TournamentArrangment, PlaysTensor, ScoreBreakDownPerRound
 
 if __name__ == '__main__':
     Args = sys.argv
@@ -198,16 +202,24 @@ if __name__ == '__main__':
         RandomSeed = eval(Args[3])
     else:
         RandomSeed = None
-    ea,FinalPopulation, BestScoreForAllRounds, BestScoreRound, PlaysTensor, ScoreBreakDownPerRound = ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed)
+    ea,FinalPopulation, BestScoreForAllRounds, BestScoreRound, TournamentArrangment, PlaysTensor, ScoreBreakDownPerRound = ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed)
     print '#'*70
     print 'Arrangment:'
-    print PlaysTensor
+    print TournamentArrangment[:BestScoreRound]
     print '#'*70
     print 'Scores:'
-    print ScoreBreakDownPerRound
+    for [BaseScore,SwapNumber,PlaysMatrix,MaxPlays,MinPlays] in ScoreBreakDownPerRound:
+        print 'Swap # %2i , Score %8g , Min Plays %2i , Max Plays %2i'% (SwapNumber,BaseScore,MaxPlays,MinPlays)
+        print 'Full Play Matrix was:'
+        for Row in PlaysMatrix:
+            print Row
+        # If we reached optimum solution do not show the rest
+        if SwapNumber == BaseScore:
+            break
+    print 
     print 'Best Score'
     print BestScoreForAllRounds
-    print 'Achived in round'
+    print 'Achieved in round'
     print BestScoreRound
     
     
