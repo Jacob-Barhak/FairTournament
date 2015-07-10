@@ -17,7 +17,7 @@ from time import time
 import inspyred
 
 
-def CalculatePlayerSwaps(NumberOfPlayers):
+def CalculatePlayerSwaps(random, NumberOfPlayers):
     "Calculates a random set of player pair swaps"
     # Determine the number of swaps pairs - at least one 
     # and at most all players swap
@@ -30,7 +30,7 @@ def CalculatePlayerSwaps(NumberOfPlayers):
     return Swaps
 
 
-def Generator(Random, args):
+def Generator(random, args):
     "Generate solutions"
     TeamSizes = args['TeamSizes']
     MaxRounds = args['MaxRounds']
@@ -40,7 +40,7 @@ def Generator(Random, args):
     # round of swaps then number of rounds since initial placing is
     # always 1:NumberPofPlayers
     for RoundCount in range(MaxRounds-1):
-        SwapsToNextRound = CalculatePlayerSwaps(NumberOfPlayers)
+        SwapsToNextRound = CalculatePlayerSwaps(random, NumberOfPlayers)
         GeneratedSwaps.append(SwapsToNextRound)
     return GeneratedSwaps
 
@@ -83,10 +83,10 @@ def Evaluator(Candidate, args):
     MaxRounds = args['MaxRounds']
     NumberOfPlayers = sum(TeamSizes)    
     CurrentPlayerVector = list(range(NumberOfPlayers))
-    TournamentArrangment = []
+    TournamentArrangment = [CurrentPlayerVector[:]]
     for RoundSwaps in Candidate:
         CurrentPlayerVector = ApplySwaps(CurrentPlayerVector,RoundSwaps)
-        TournamentArrangment.appned(CurrentPlayerVector)
+        TournamentArrangment.append(CurrentPlayerVector)
     # TBD, define score for tournament
     # first figure out who played with who how many times for each round
     # So create and initialize the tensor
@@ -125,26 +125,26 @@ def Evaluator(Candidate, args):
     return BestScoreForAllRounds
 
 @inspyred.ec.variators.crossover
-def Crossover(Random, Mom, Dad, args):
+def Crossover(random, Mom, Dad, args):
     "Crossover round swaps between two tournament solutions"
     Brother = copy.deepcopy(Dad[:])
     Sister = copy.deepcopy(Dad[:])
     for (Round, BrotherRoundSwaps) in enumerate(Brother):
-        if Random.random()<0.5:
+        if random.random()<0.5:
             Brother[Round] = Sister[Round]
             Sister[Round] = BrotherRoundSwaps
     return Brother,Sister
 
 @inspyred.ec.variators.mutator
-def Mutator(Random, Candidate, args):
+def Mutator(random, Candidate, args):
     "Mutate swaps to add some variation"
     TeamSizes = args['TeamSizes']
     NumberOfPlayers = sum(TeamSizes)    
-    MutationRate = args('mutation_rate')
+    MutationRate = args['mutation_rate']
     Mutated = copy.deepcopy(Candidate)
     for (Round, RoundSwaps) in enumerate(Mutated):
-        if Random.random() < MutationRate:
-            Mutated[Round] = CalculatePlayerSwaps(NumberOfPlayers)
+        if random.random() < MutationRate:
+            Mutated[Round] = CalculatePlayerSwaps(random, NumberOfPlayers)
     return Mutated
    
 
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     Args = sys.argv
     TeamSizes = eval(Args[1])
     MaxRounds = eval(Args[2])
-    if len(Args) == 3:
+    if len(Args) == 4:
         RandomSeed = eval(Args[3])
     else:
         RandomSeed = None
