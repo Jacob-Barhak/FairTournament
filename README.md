@@ -45,8 +45,8 @@ The inputs are:
 
 
 The output is:
-A list of player at each team for each tournament round
-Statistics about tournament fairness each round
+* A list of player at each team for each tournament round
+* Statistics about tournament fairness each round
 
 EXAMPLE:
 --------
@@ -57,6 +57,7 @@ python Fair.py [2,2] 5
 VERSION HISTORY:
 ----------------
 Development started on 2nd July 2015.
+
 Still under development - no version number assigned
 
 
