@@ -1,6 +1,6 @@
 Fair Tournament 
 ===============
-This project is currently under construction. Feel free to clone and contribute.
+This project is currently under construction yet is already working to some degree. Feel free to clone and contribute.
 
 This system attempts to create a fair tournament with M teams with N1,N2..Nm players in each team.
 
@@ -31,14 +31,26 @@ It seems like an NP hard problem with elements simialr to the traveling salesman
 
 The solution approach taken uses Evolutionary Computation using [Inpyred] (https://github.com/aarongarrett/inspyred).
 
+
+
+USAGE:
+------
+python Fair.py TeamSizes MaxRounds [RandomSeed]
+
 The inputs are:
-* TeamSizes vector - this list defines team sizes. For example the e=above example would show [2,2]
+* TeamSizes - this list defines team sizes. For example the e=above example would show [2,2]
 * MaxRounds - an integer defining the maximum number of rounds in the tournament
+* RandomSeed - an optional parameter to set Random seed of computations - is missing timer is used
+
 
 The output is:
-A list of player swaps after each tournament round
+A list of player at each team for each tournament round
 Statistics about tournament fairness each round
 
+EXAMPLE:
+--------
+To solve the 2 team problem above using the program type:
+python Fair.py [2,2] 5
 
 
 DEVELOPER CONTACT INFO:
