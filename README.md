@@ -33,6 +33,7 @@ The solution approach taken uses Evolutionary Computation using [Inpyred] (https
 
 
 
+
 USAGE:
 ------
 python Fair.py TeamSizes MaxRounds [RandomSeed]
@@ -40,7 +41,7 @@ python Fair.py TeamSizes MaxRounds [RandomSeed]
 The inputs are:
 * TeamSizes - this list defines team sizes. For example the e=above example would show [2,2]
 * MaxRounds - an integer defining the maximum number of rounds in the tournament
-* RandomSeed - an optional parameter to set Random seed of computations - is missing timer is used
+* RandomSeed - an optional parameter to set Random seed of computations - if missing timer is used
 
 
 The output is:
@@ -51,6 +52,12 @@ EXAMPLE:
 --------
 To solve the 2 team problem above using the program type:
 python Fair.py [2,2] 5
+
+
+VERSION HISTORY:
+----------------
+Development started on 2nd July 2015.
+Still under development - no version number assigned
 
 
 DEVELOPER CONTACT INFO:
