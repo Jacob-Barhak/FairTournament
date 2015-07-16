@@ -39,11 +39,9 @@ USAGE:
 python Fair.py TeamSizes MaxRounds [RandomSeed]
 
 The inputs are:
-* TeamSizes - this list defines team sizes. For example the e=above example would show [2,2]
+* TeamSizes - this list defines team sizes. For example the above example would show [2,2]. A negative team size means that there is a judge in that team that does not swap positions.
 * MaxRounds - an integer defining the maximum number of rounds in the tournament
-* Judges - if not empty or zero, the first team member in each team does not ever swap
 * RandomSeed - an optional parameter to set Random seed of computations - if missing timer is used
-
 
 
 The output is:
