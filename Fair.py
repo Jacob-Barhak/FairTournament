@@ -15,16 +15,29 @@ import copy
 import random
 from time import time
 import inspyred
+import numpy
 
 
-def CalculatePlayerSwaps(random, NumberOfPlayers):
+def NumberOfPlayersAndJudges(TeamSizes):
+    "Calculate number of players and find judges"
+    NumberOfPlayers = 0
+    Judges = []
+    for TeamSize in TeamSizes:
+        # a negative team size means a judge at the begining of the team
+        if TeamSize<0:
+            Judges.append(abs(NumberOfPlayers))
+        NumberOfPlayers = NumberOfPlayers + abs(TeamSize)
+    return NumberOfPlayers,Judges
+        
+
+def CalculatePlayerSwaps(random, NumberOfPlayers,Judges):
     "Calculates a random set of player pair swaps"
     # Determine the number of swaps pairs - at least one 
     # and at most all players swap
     # note that odd numbers one player will always not sawp
-    NumberOfSwapPairs = random.randint(1,NumberOfPlayers//2)
+    NumberOfSwapPairs = random.randint(1,(NumberOfPlayers-len(Judges))//2)
     # generate candidates
-    PlayerPositions = list(range(NumberOfPlayers))
+    PlayerPositions = list(set(range(NumberOfPlayers))-set(Judges))
     Swaps = random.sample(PlayerPositions, NumberOfSwapPairs*2)
     # return a list of players swaped - each pair is a swap
     return Swaps
@@ -34,15 +47,16 @@ def Generator(random, args):
     "Generate solutions"
     TeamSizes = args['TeamSizes']
     MaxRounds = args['MaxRounds']
-    NumberOfPlayers = sum(TeamSizes)
+    (NumberOfPlayers,Judges) = NumberOfPlayersAndJudges(TeamSizes)
     GeneratedSwaps = [] 
     # Now calculate swaps for each round. Note that we need one kess
     # round of swaps then number of rounds since initial placing is
     # always 1:NumberPofPlayers
     for SwapNumber in range(MaxRounds-1):
-        SwapsToNextRound = CalculatePlayerSwaps(random, NumberOfPlayers)
+        SwapsToNextRound = CalculatePlayerSwaps(random, NumberOfPlayers,Judges)
         GeneratedSwaps.append(SwapsToNextRound)
     return GeneratedSwaps
+
 
 def ApplySwaps(CurrentPlayerVector,RoundSwaps):
     "Applies swaps to current player vector to deduce next round teams"
@@ -66,12 +80,12 @@ def PlayedWithPlayerCount(Player, TeamSizes, PreviousPlaysForPlayer, PlayerArran
     Team = None
     ReturnPlaysPerPlayer = PreviousPlaysForPlayer[:]
     for TeamSize in TeamSizes:
-        Team = PlayerArrangementForRound[TeamStart:(TeamStart + TeamSize)]
+        Team = PlayerArrangementForRound[TeamStart:(TeamStart + abs(TeamSize))]
         if Player in Team:
             for TeamPlayer in Team:
                 ReturnPlaysPerPlayer[TeamPlayer] = ReturnPlaysPerPlayer[TeamPlayer] + 1
             break
-        TeamStart = TeamStart + TeamSize
+        TeamStart = TeamStart + abs(TeamSize)
     assert Team != None
     return ReturnPlaysPerPlayer
 
@@ -79,7 +93,7 @@ def PlayedWithPlayerCount(Player, TeamSizes, PreviousPlaysForPlayer, PlayerArran
 
 def FullEvaluation(Candidate, TeamSizes, MaxRounds):
     "Score candidates composed of player swaps - output full results"
-    NumberOfPlayers = sum(TeamSizes)    
+    (NumberOfPlayers,Judges) = NumberOfPlayersAndJudges(TeamSizes)
     CurrentPlayerVector = list(range(NumberOfPlayers))
     Tournamentarrangement = [CurrentPlayerVector[:]]
     for RoundSwaps in Candidate:
@@ -110,18 +124,30 @@ def FullEvaluation(Candidate, TeamSizes, MaxRounds):
         # At the same time collect information for the third criterion
         MaxPlays = 0
         MinPlays = MaxRounds+1
+        MaxJudgePlays = 0
+        MinJudgePlays = MaxRounds+1
+        OtherPlayerCountList = []
         for (Player,PlaysPerPlayer) in enumerate(PlaysMatrix):
-            PlaysOfOtherPlayers = PlaysPerPlayer[:Player] + PlaysPerPlayer[Player+1:]
-            for OtherPlayerCount in PlaysOfOtherPlayers:
-                # use 100*MaxRounds squared since this is the most important 
-                # condition to fulfill and we want it to to be significantly
-                # Higer that other conditions
-                BaseScore = BaseScore + (OtherPlayerCount == 0)*100*MaxRounds*MaxRounds
-                MaxPlays = max(MaxPlays,OtherPlayerCount)
-                MinPlays = min(MinPlays,OtherPlayerCount)            
+            if Player not in Judges:
+                PlaysOfOtherPlayers = [PlaysPerPlayer[OtherPlayer] for OtherPlayer in CurrentPlayerVector if (OtherPlayer not in (Judges + [Player])) ]
+                PlaysWithOtherJudges = [PlaysPerPlayer[OtherPlayer] for OtherPlayer in CurrentPlayerVector if (OtherPlayer in Judges)]
+                for OtherPlayerCount in PlaysOfOtherPlayers:
+                    # use 100*MaxRounds squared since this is the most important 
+                    # condition to fulfill and we want it to to be significantly
+                    # Higer that other conditions
+                    BaseScore = BaseScore + (OtherPlayerCount == 0)*100*MaxRounds*MaxRounds
+                    MaxPlays = max(MaxPlays,OtherPlayerCount)
+                    MinPlays = min(MinPlays,OtherPlayerCount)            
+                    OtherPlayerCountList.append(OtherPlayerCount*OtherPlayerCount)
+                for OtherJudgeCount in PlaysWithOtherJudges:
+                    MaxJudgePlays = max(MaxJudgePlays,OtherJudgeCount)
+                    MinJudgePlays = min(MinJudgePlays,OtherJudgeCount)            
+
         # The third component is the difference between plays
         # and  multiply it by MaxRounds to be higher than others
-        BaseScore = BaseScore + (MaxPlays-MinPlays)*MaxRounds*10
+        # Also add std in that formula to help smooth score transitions
+        # Note that plays with judges are as important as playes with players
+        BaseScore = BaseScore + (0.25*numpy.std(OtherPlayerCountList) + 0.25*(MaxPlays-MinPlays) + 0.5*(MaxJudgePlays-MinJudgePlays))*MaxRounds*10
         # Also register te score breakdown per round
         ScoreBreakDownPerRound.append([BaseScore,SwapNumber,PlaysMatrix,MaxPlays,MinPlays])
         if BaseScore < BestScoreForAllRounds:
@@ -158,12 +184,12 @@ def Crossover(random, Mom, Dad, args):
 def Mutator(random, Candidate, args):
     "Mutate swaps to add some variation"
     TeamSizes = args['TeamSizes']
-    NumberOfPlayers = sum(TeamSizes)    
+    (NumberOfPlayers,Judges) = NumberOfPlayersAndJudges(TeamSizes)
     MutationRate = args['mutation_rate']
     Mutated = copy.deepcopy(Candidate)
     for (Round, RoundSwaps) in enumerate(Mutated):
         if random.random() < MutationRate:
-            Mutated[Round] = CalculatePlayerSwaps(random, NumberOfPlayers)
+            Mutated[Round] = CalculatePlayerSwaps(random, NumberOfPlayers,Judges)
     return Mutated
    
 
@@ -171,7 +197,8 @@ def ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed):
     if RandomSeed is None:
         RandomSeedToUse = random.Random()
         RandomSeedToUse.seed(time()) 
-    Players = list(range(sum(TeamSizes)))
+    (NumberOfPlayers,Judges) = NumberOfPlayersAndJudges(TeamSizes)
+    Players = list(range(NumberOfPlayers))
     ea = inspyred.ec.EvolutionaryComputation(RandomSeedToUse)
     ea.selector = inspyred.ec.selectors.tournament_selection
     ea.variator = [Crossover, Mutator]
@@ -224,9 +251,9 @@ def PrintResults(TeamSizes,MaxRounds,AllEvolutionaryComuptationResults):
         print 'Round Number %i player arrangement:'%(SwapNumber+1)
         TeamStart = 0
         for (TeamEnum,TeamSize) in enumerate(TeamSizes):
-            Team = RoundPlacements[TeamStart:(TeamStart + TeamSize)]
+            Team = RoundPlacements[TeamStart:(TeamStart + abs(TeamSize))]
             print '  Team %2i: %s' % ((TeamEnum+1),str(Team))
-            TeamStart = TeamStart + TeamSize
+            TeamStart = TeamStart + abs(TeamSize)
         if SwapNumber == BestScoreRound:
             print '$'*40
             print 'Use Above for Best Solution'
