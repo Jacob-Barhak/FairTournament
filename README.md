@@ -41,7 +41,9 @@ python Fair.py TeamSizes MaxRounds [RandomSeed]
 The inputs are:
 * TeamSizes - this list defines team sizes. For example the e=above example would show [2,2]
 * MaxRounds - an integer defining the maximum number of rounds in the tournament
+* Judges - if not empty or zero, the first team member in each team does not ever swap
 * RandomSeed - an optional parameter to set Random seed of computations - if missing timer is used
+
 
 
 The output is:
@@ -52,6 +54,13 @@ EXAMPLE:
 --------
 To solve the 2 team problem above using the program type:
 python Fair.py [2,2] 5
+
+
+FILES:
+------
+Fair.py : Main file with calculations
+Readme.md : The file that you are reading now
+Examples.py : Test suit with examples that test the application
 
 
 VERSION HISTORY:
