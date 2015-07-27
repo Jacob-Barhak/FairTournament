@@ -27,7 +27,7 @@ For example for 2 teams of 2 players the solution is:
 
 So each player plays 2 games with each other player and 3 rounds are required. 
 
-It seems like an NP hard problem with elements simialr to the traveling salesman problem. Yet no reduction was attempted, so we cannot be sure.
+It seems like an NP hard problem with elements similar to the traveling salesman problem. Yet no reduction was attempted, so we cannot be sure.
 
 The solution approach taken uses Evolutionary Computation using [Inpyred] (https://github.com/aarongarrett/inspyred).
 
