@@ -224,44 +224,44 @@ def ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed):
 def PrintResults(TeamSizes,MaxRounds,AllEvolutionaryComuptationResults):
     "Output results nicely"    
     (ea,FinalPopulation, BestScoreForAllRounds, BestScoreRound, Tournamentarrangement, PlaysTensor, ScoreBreakDownPerRound) = AllEvolutionaryComuptationResults
-    print '#'*70
-    print '#'*70
-    print 'Scores:'
+    print ('#'*70)
+    print ('#'*70)
+    print ('Scores:')
     for [BaseScore,SwapNumber,PlaysMatrix,MaxPlays,MinPlays] in ScoreBreakDownPerRound:
-        print 'Swap # %2i , Score %8g , Min Plays %2i , Max Plays %2i'% (SwapNumber,BaseScore,MinPlays,MaxPlays)
-        print 'Full Play Matrix was:'
+        print ('Swap # %2i , Score %8g , Min Plays %2i , Max Plays %2i'% (SwapNumber,BaseScore,MinPlays,MaxPlays))
+        print ('Full Play Matrix was:')
         for Row in PlaysMatrix:
-            print Row
+            print (Row)
         # If we reached optimum solution do not show the rest
         if SwapNumber == BaseScore:
-            print 'Assuming this is the optimal solution and not showing further rounds !!!'
+            print ('Assuming this is the optimal solution and not showing further rounds !!!')
             break
-    print 
-    print 'Best Score'
-    print BestScoreForAllRounds
-    print 'Achieved in round'
-    print BestScoreRound
+    print ()
+    print ('Best Score')
+    print (BestScoreForAllRounds)
+    print ('Achieved in round')
+    print (BestScoreRound)
     if BestScoreForAllRounds <= MaxRounds :
-        print 'This may very well be the optimal solution !!!'
+        print ('This may very well be the optimal solution !!!')
     else:
-        print 'This is not an optimal solution - increasing MaxRounds may improve result'
+        print ('This is not an optimal solution - increasing MaxRounds may improve result')
 
     for (SwapNumber,RoundPlacements) in enumerate(Tournamentarrangement):
-        print '#'*70        
-        print 'Round Number %i player arrangement:'%(SwapNumber+1)
+        print ('#'*70)
+        print ('Round Number %i player arrangement:'%(SwapNumber+1))
         TeamStart = 0
         for (TeamEnum,TeamSize) in enumerate(TeamSizes):
             Team = RoundPlacements[TeamStart:(TeamStart + abs(TeamSize))]
-            print '  Team %2i: %s' % ((TeamEnum+1),str(Team))
+            print ('  Team %2i: %s' % ((TeamEnum+1),str(Team)))
             TeamStart = TeamStart + abs(TeamSize)
         if SwapNumber == BestScoreRound:
-            print '$'*40
-            print 'Use Above for Best Solution'
+            print ('$'*40)
+            print ('Use Above for Best Solution')
             if BestScoreForAllRounds <= MaxRounds:
                 break
-                print 'Assuming optimal solution - not printing anymore'
-            print '$'*40
-    print '#'*70        
+                print ('Assuming optimal solution - not printing anymore')
+            print ('$'*40)
+    print ('#'*70)
 
 
 if __name__ == '__main__':
