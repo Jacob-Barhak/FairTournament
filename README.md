@@ -82,11 +82,7 @@ http://sites.google.com/site/jacobbarhak/
 ACKNOWLEDGEMENTS:
 -----------------
 Thanks to Aaron Garrett for bouncing ideas and creating Inspyred.
-Thanks to all those who helped organize the Hanabi Tournamet for Board Game Bash and contributed thoughts and ideas, and especially to:
-Matthew Robison, Matt Stephans, Neal Tibrewala, James Jones, and Astro Avora.
-Thanks to Jonathan Grabert the organizer of Board Game Bash where we will test this for the first time:
-http://www.boardgamebash.com/
-Final thanks to Robert Myers who runs Julython that helped speed things up:
+Thanks to Robert Myers who runs Julython that helped speed things up:
 http://www.julython.org/
 
 LICENSE
