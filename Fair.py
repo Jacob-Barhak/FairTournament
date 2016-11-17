@@ -52,7 +52,7 @@ def Generator(random, args):
     # Now calculate swaps for each round. Note that we need one kess
     # round of swaps then number of rounds since initial placing is
     # always 1:NumberPofPlayers
-    for SwapNumber in range(MaxRounds-1):
+    for SwapEnum in range(MaxRounds-1):
         SwapsToNextRound = CalculatePlayerSwaps(random, NumberOfPlayers,Judges)
         GeneratedSwaps.append(SwapsToNextRound)
     return GeneratedSwaps
@@ -103,24 +103,24 @@ def FullEvaluation(Candidate, TeamSizes, MaxRounds):
     # first figure out who played with who how many times for each round
     # So create and initialize the tensor
     PlaysTensor = []
-    for SwapNumber in range(MaxRounds):
-        if SwapNumber == 0:
+    for SwapEnum in range(MaxRounds):
+        if SwapEnum == 0:
             PreviousPlays = [[0] * NumberOfPlayers]* NumberOfPlayers
         else:
-            PreviousPlays = PlaysTensor[SwapNumber-1]
-        PlaysMatrix = [ PlayedWithPlayerCount(Player, TeamSizes, PreviousPlays[Player], Tournamentarrangement[SwapNumber]) for Player in range(NumberOfPlayers)]
+            PreviousPlays = PlaysTensor[SwapEnum-1]
+        PlaysMatrix = [ PlayedWithPlayerCount(Player, TeamSizes, PreviousPlays[Player], Tournamentarrangement[SwapEnum]) for Player in range(NumberOfPlayers)]
         PlaysTensor.append(PlaysMatrix)
     # Analyze the players tensor
     BestScoreForAllRounds = float('Inf')
     BestScoreRound = MaxRounds + 1
     ScoreBreakDownPerRound = []
-    for SwapNumber in range(MaxRounds):
+    for SwapEnum in range(MaxRounds):
         # The base score is the round number to make sure that
         # the first round wiht the low score appears first
-        BaseScore = SwapNumber
+        BaseScore = SwapEnum
         # The second component of the score is checking if
         # every player is playing with another
-        PlaysMatrix = PlaysTensor[SwapNumber]
+        PlaysMatrix = PlaysTensor[SwapEnum]
         # At the same time collect information for the third criterion
         MaxPlays = 0
         MinPlays = MaxRounds+1
@@ -149,13 +149,13 @@ def FullEvaluation(Candidate, TeamSizes, MaxRounds):
         # Note that plays with judges are as important as playes with players
         BaseScore = BaseScore + (0.25*numpy.std(OtherPlayerCountList) + 0.25*(MaxPlays-MinPlays) + 0.5*(MaxJudgePlays-MinJudgePlays))*MaxRounds*10
         # Also register te score breakdown per round
-        ScoreBreakDownPerRound.append([BaseScore,SwapNumber,PlaysMatrix,MaxPlays,MinPlays])
+        ScoreBreakDownPerRound.append([BaseScore,SwapEnum,PlaysMatrix,MaxPlays,MinPlays])
         if BaseScore < BestScoreForAllRounds:
             BestScoreForAllRounds = BaseScore
             # in human terms Round 1 is predetermined
-            # therefore for SwapNumber zero we are calculating 
+            # therefore for SwapEnum zero we are calculating 
             # Round 2 - in other words, there is always a swap
-            BestScoreRound = SwapNumber + 1
+            BestScoreRound = SwapEnum + 1
     return  (BestScoreForAllRounds, BestScoreRound, Tournamentarrangement, PlaysTensor, ScoreBreakDownPerRound)
     
 
@@ -227,13 +227,13 @@ def PrintResults(TeamSizes,MaxRounds,AllEvolutionaryComuptationResults):
     print ('#'*70)
     print ('#'*70)
     print ('Scores:')
-    for [BaseScore,SwapNumber,PlaysMatrix,MaxPlays,MinPlays] in ScoreBreakDownPerRound:
-        print ('Swap # %2i , Score %8g , Min Plays %2i , Max Plays %2i'% (SwapNumber,BaseScore,MinPlays,MaxPlays))
+    for [BaseScore,SwapEnum,PlaysMatrix,MaxPlays,MinPlays] in ScoreBreakDownPerRound:
+        print ('Swap # %2i , Score %8g , Min Plays %2i , Max Plays %2i'% (SwapEnum+1,BaseScore,MinPlays,MaxPlays))
         print ('Full Play Matrix was:')
         for Row in PlaysMatrix:
             print (Row)
         # If we reached optimum solution do not show the rest
-        if SwapNumber == BaseScore:
+        if SwapEnum == BaseScore:
             print ('Assuming this is the optimal solution and not showing further rounds !!!')
             break
     print ()
@@ -246,15 +246,15 @@ def PrintResults(TeamSizes,MaxRounds,AllEvolutionaryComuptationResults):
     else:
         print ('This is not an optimal solution - increasing MaxRounds may improve result')
 
-    for (SwapNumber,RoundPlacements) in enumerate(Tournamentarrangement):
+    for (SwapEnum,RoundPlacements) in enumerate(Tournamentarrangement):
         print ('#'*70)
-        print ('Round Number %i player arrangement:'%(SwapNumber+1))
+        print ('Round Number %i player arrangement:'%(SwapEnum+1))
         TeamStart = 0
         for (TeamEnum,TeamSize) in enumerate(TeamSizes):
             Team = RoundPlacements[TeamStart:(TeamStart + abs(TeamSize))]
             print ('  Team %2i: %s' % ((TeamEnum+1),str(Team)))
             TeamStart = TeamStart + abs(TeamSize)
-        if SwapNumber == BestScoreRound:
+        if SwapEnum+1 == BestScoreRound:
             print ('$'*40)
             print ('Use Above for Best Solution')
             if BestScoreForAllRounds <= MaxRounds:
