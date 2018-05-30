@@ -1,10 +1,10 @@
 Fair Tournament 
 ===============
-This project is currently under construction yet is already working to some degree. Feel free to clone and contribute.
+This project demonstrates the use of Evolutionary Computation for a tournament planning optimization problem with a large solution space.
 
 This system attempts to create a fair tournament with M teams with N1,N2..Nm players in each team.
 
-We want to determine who is the best player by running at most MaxRounds rounds with all games plated in parallel and rotating teams.
+We want to determine who is the best player by running at most MaxRounds rounds with all games played in parallel and rotating teams.
 
 We want: 
  1. Each player to play with all other players, i.e. be on the same team with them. 
@@ -64,8 +64,7 @@ Examples.py : Test suit with examples that test the application
 VERSION HISTORY:
 ----------------
 Development started on 2nd July 2015.
-
-Still under development - no version number assigned
+Fixes towards PyCon Israel on 30th May 2018.
 
 
 DEVELOPER CONTACT INFO:
@@ -88,7 +87,7 @@ http://www.julython.org/
 LICENSE
 -------
 
-Copyright (C) 2015 Jacob Barhak
+Copyright (C) 2015, 2018 Jacob Barhak
  
 This file is part of Fair Tournament. The Fair Tournament is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

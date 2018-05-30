@@ -13,7 +13,7 @@ import subprocess
 import shlex
 import sys
 
-# THis file contanes some test examples to show tournamet generations with 
+# THis file contains some test examples to show tournament generations with 
 # different sizes to test the program
 
 

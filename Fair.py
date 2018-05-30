@@ -1,5 +1,5 @@
 ##############################################################################
-#Copyright (C) 2015 Jacob Barhak
+#Copyright (C) 2015, 2018 Jacob Barhak
 # 
 #This file is part of Fair Tournament. The Fair Tournament is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 #
@@ -23,7 +23,7 @@ def NumberOfPlayersAndJudges(TeamSizes):
     NumberOfPlayers = 0
     Judges = []
     for TeamSize in TeamSizes:
-        # a negative team size means a judge at the begining of the team
+        # a negative team size means a judge at the beginning of the team
         if TeamSize<0:
             Judges.append(abs(NumberOfPlayers))
         NumberOfPlayers = NumberOfPlayers + abs(TeamSize)
@@ -34,12 +34,12 @@ def CalculatePlayerSwaps(random, NumberOfPlayers,Judges):
     "Calculates a random set of player pair swaps"
     # Determine the number of swaps pairs - at least one 
     # and at most all players swap
-    # note that odd numbers one player will always not sawp
+    # note that odd numbers one player will always not swap
     NumberOfSwapPairs = random.randint(1,(NumberOfPlayers-len(Judges))//2)
     # generate candidates
     PlayerPositions = list(set(range(NumberOfPlayers))-set(Judges))
     Swaps = random.sample(PlayerPositions, NumberOfSwapPairs*2)
-    # return a list of players swaped - each pair is a swap
+    # return a list of players swapped - each pair is a swap
     return Swaps
 
 
@@ -49,7 +49,7 @@ def Generator(random, args):
     MaxRounds = args['MaxRounds']
     (NumberOfPlayers,Judges) = NumberOfPlayersAndJudges(TeamSizes)
     GeneratedSwaps = [] 
-    # Now calculate swaps for each round. Note that we need one kess
+    # Now calculate swaps for each round. Note that we need one less
     # round of swaps then number of rounds since initial placing is
     # always 1:NumberPofPlayers
     for SwapEnum in range(MaxRounds-1):
@@ -116,7 +116,7 @@ def FullEvaluation(Candidate, TeamSizes, MaxRounds):
     ScoreBreakDownPerRound = []
     for SwapEnum in range(MaxRounds):
         # The base score is the round number to make sure that
-        # the first round wiht the low score appears first
+        # the first round with the low score appears first
         BaseScore = SwapEnum
         # The second component of the score is checking if
         # every player is playing with another
@@ -134,7 +134,7 @@ def FullEvaluation(Candidate, TeamSizes, MaxRounds):
                 for OtherPlayerCount in PlaysOfOtherPlayers:
                     # use 100*MaxRounds squared since this is the most important 
                     # condition to fulfill and we want it to to be significantly
-                    # Higer that other conditions
+                    # Higher that other conditions
                     BaseScore = BaseScore + (OtherPlayerCount == 0)*100*MaxRounds*MaxRounds
                     MaxPlays = max(MaxPlays,OtherPlayerCount)
                     MinPlays = min(MinPlays,OtherPlayerCount)            
@@ -148,7 +148,7 @@ def FullEvaluation(Candidate, TeamSizes, MaxRounds):
         # Also add std in that formula to help smooth score transitions
         # Note that plays with judges are as important as playes with players
         BaseScore = BaseScore + (0.25*numpy.std(OtherPlayerCountList) + 0.25*(MaxPlays-MinPlays) + 0.5*(MaxJudgePlays-MinJudgePlays))*MaxRounds*10
-        # Also register te score breakdown per round
+        # Also register the score breakdown per round
         ScoreBreakDownPerRound.append([BaseScore,SwapEnum,PlaysMatrix,MaxPlays,MinPlays])
         if BaseScore < BestScoreForAllRounds:
             BestScoreForAllRounds = BaseScore
@@ -161,7 +161,7 @@ def FullEvaluation(Candidate, TeamSizes, MaxRounds):
 
 @inspyred.ec.evaluators.evaluator
 def Evaluator(Candidate, args):
-    "Score candidtes composed of player swaps"
+    "Score candidates composed of player swaps"
     # First recreate the team from the swaps
     TeamSizes = args['TeamSizes']
     MaxRounds = args['MaxRounds']
@@ -173,7 +173,7 @@ def Evaluator(Candidate, args):
 def Crossover(random, Mom, Dad, args):
     "Crossover round swaps between two tournament solutions"
     Brother = copy.deepcopy(Dad[:])
-    Sister = copy.deepcopy(Dad[:])
+    Sister = copy.deepcopy(Mom[:])
     for (Round, BrotherRoundSwaps) in enumerate(Brother):
         if random.random()<0.5:
             Brother[Round] = Sister[Round]
@@ -266,15 +266,22 @@ def PrintResults(TeamSizes,MaxRounds,AllEvolutionaryComuptationResults):
 
 if __name__ == '__main__':
     Args = sys.argv
-    TeamSizes = eval(Args[1])
-    MaxRounds = eval(Args[2])
-    if len(Args) == 4:
-        RandomSeed = eval(Args[3])
+    if len(Args)<3:
+        print "USAGE: python Fair.py TeamSizes MaxRounds [RandomSeed]"
+        print " TeamSizes is a list of sizes of teams, a negative number means a team with a judge"
+        print " MaxRounds represents the maximum number of rounds in the tournament"
+        print " RandomSeed is an optional number if omitted, random number is used"
+        print " Example: python Fair.py [2,3] 10"
+        print " Calculate the fairest tournament of 5 individuals swapping between teams "
+        print " of size 2,3 with a maximum of 10 rounds of swaps"
     else:
-        RandomSeed = None
-    AllEvolutionaryComuptationResults = ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed)
-    PrintResults(TeamSizes,MaxRounds,AllEvolutionaryComuptationResults)
+        if len(Args) >= 4:
+            RandomSeed = eval(Args[3])
+        else:
+            RandomSeed = None
+        TeamSizes = eval(Args[1])
+        MaxRounds = eval(Args[2])
+        AllEvolutionaryComuptationResults = ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed)
+        PrintResults(TeamSizes,MaxRounds,AllEvolutionaryComuptationResults)
 
-    
-    
 
