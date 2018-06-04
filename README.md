@@ -36,13 +36,14 @@ The solution approach taken uses Evolutionary Computation using [Inpyred] (https
 
 USAGE:
 ------
-python Fair.py TeamSizes MaxRounds [RandomSeed]
+python Fair.py TeamSizes MaxRounds [RandomSeed] [PopSize] [MaxGen]
 
 The inputs are:
 * TeamSizes - this list defines team sizes. For example the above example would show [2,2]. A negative team size means that there is a judge in that team that does not swap positions.
 * MaxRounds - an integer defining the maximum number of rounds in the tournament
 * RandomSeed - an optional parameter to set Random seed of computations - if missing timer is used
-
+* PopSize - defines the population size - default 100"
+* MaxGen - defines the number of generations - default 1000"
 
 The output is:
 * A list of player at each team for each tournament round
@@ -64,7 +65,7 @@ Examples.py : Test suit with examples that test the application
 VERSION HISTORY:
 ----------------
 Development started on 2nd July 2015.
-Fixes towards PyCon Israel on 30th May 2018.
+Fixes towards PyCon Israel on 30th May 2018 and on 4th June 2018.
 
 
 DEVELOPER CONTACT INFO:

@@ -193,10 +193,13 @@ def Mutator(random, Candidate, args):
     return Mutated
    
 
-def ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed):
+def ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed,PopSize,MaxGen):
+    "Execute Evolutionary Computation"
+    RandomSeedToUse = random.Random()
     if RandomSeed is None:
-        RandomSeedToUse = random.Random()
-        RandomSeedToUse.seed(time()) 
+        RandomSeedToUse.seed(time())
+    else:
+        RandomSeedToUse.seed(RandomSeed)
     (NumberOfPlayers,Judges) = NumberOfPlayersAndJudges(TeamSizes)
     Players = list(range(NumberOfPlayers))
     ea = inspyred.ec.EvolutionaryComputation(RandomSeedToUse)
@@ -207,13 +210,13 @@ def ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed):
     ea.observer = inspyred.ec.observers.stats_observer
     FinalPopulation = ea.evolve(generator=Generator,
                           evaluator=Evaluator,
-                          pop_size=10000, 
+                          pop_size=PopSize, 
                           bounder=inspyred.ec.DiscreteBounder(Players),
                           maximize=False,
                           tournament_size=7,
                           num_selected=2, 
                           num_elites=1,
-                          max_generations=10000,
+                          max_generations=MaxGen,
                           mutation_rate=0.1,
                           TeamSizes=TeamSizes,
                           MaxRounds=MaxRounds)
@@ -267,10 +270,12 @@ def PrintResults(TeamSizes,MaxRounds,AllEvolutionaryComuptationResults):
 if __name__ == '__main__':
     Args = sys.argv
     if len(Args)<3:
-        print "USAGE: python Fair.py TeamSizes MaxRounds [RandomSeed]"
+        print "USAGE: python Fair.py TeamSizes MaxRounds [RandomSeed] [PopSize] [MaxGen]"
         print " TeamSizes is a list of sizes of teams, a negative number means a team with a judge"
         print " MaxRounds represents the maximum number of rounds in the tournament"
         print " RandomSeed is an optional number if omitted, random number is used"
+        print " PopSize defines the population size - default 100"
+        print " MaxGen defines the number of generations - default 1000"
         print " Example: python Fair.py [2,3] 10"
         print " Calculate the fairest tournament of 5 individuals swapping between teams "
         print " of size 2,3 with a maximum of 10 rounds of swaps"
@@ -279,9 +284,18 @@ if __name__ == '__main__':
             RandomSeed = eval(Args[3])
         else:
             RandomSeed = None
+        if len(Args) >= 5:
+            PopSize = eval(Args[4])
+        else:
+            PopSize = 100
+        if len(Args) >= 6:
+            MaxGen = eval(Args[5])
+        else:
+            MaxGen = 1000
+ 
         TeamSizes = eval(Args[1])
         MaxRounds = eval(Args[2])
-        AllEvolutionaryComuptationResults = ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed)
+        AllEvolutionaryComuptationResults = ApplyEvolutionaryComputation(TeamSizes,MaxRounds,RandomSeed,PopSize,MaxGen)
         PrintResults(TeamSizes,MaxRounds,AllEvolutionaryComuptationResults)
 
 
